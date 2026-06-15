@@ -2439,6 +2439,48 @@ window.openResumenDia = function(){
   const hdrFecha = document.getElementById('resumen-fecha-hdr');
   if(hdrFecha) hdrFecha.textContent = `${fechaLarga} · Generado a las ${horaGen} por ${currentUser.displayName||currentUser.email}`;
 
+  // Agrupar por obra
+  function agruparPorObra(lista){
+    const grupos = {};
+    lista.forEach(a=>{
+      const obra = a.obra || 'Sin obra';
+      if(!grupos[obra]) grupos[obra] = [];
+      grupos[obra].push(a);
+    });
+    return Object.entries(grupos).sort(([a],[b])=>a.localeCompare(b));
+  }
+
+  function obraGroupHTML(items, showObra=false){
+    if(!items.length) return '<div class="resumen-empty">Ninguna</div>';
+    const grupos = agruparPorObra(items);
+    return grupos.map(([obra, alertas])=>`
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);background:var(--surface);padding:4px 8px;border-radius:5px;margin-bottom:4px;">🏗 ${esc(obra)} <span style="font-weight:400;color:var(--text3)">(${alertas.length})</span></div>
+        ${alertas.map(a=>rowHTML(a,false)).join('')}
+      </div>`).join('');
+  }
+
+  function movGroupHTML(movs){
+    if(!movs.length) return '<div class="resumen-empty">Sin movimientos registrados hoy</div>';
+    const grupos = {};
+    movs.forEach(({alerta:a,entrada:h})=>{
+      const obra = a.obra||'Sin obra';
+      if(!grupos[obra]) grupos[obra]=[];
+      grupos[obra].push({a,h});
+    });
+    return Object.entries(grupos).sort(([a],[b])=>a.localeCompare(b)).map(([obra,items])=>`
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);background:var(--surface);padding:4px 8px;border-radius:5px;margin-bottom:4px;">🏗 ${esc(obra)} <span style="font-weight:400;color:var(--text3)">(${items.length})</span></div>
+        ${items.map(({a,h})=>`<div class="resumen-row">
+          <div class="resumen-crit-bar" style="background:${critColor(a.criticidad)}"></div>
+          <div class="resumen-row-body">
+            <div class="resumen-row-desc">${esc(a.descripcion||'')} → <strong>${dispEstado(h.estado)}</strong></div>
+            <div class="resumen-row-meta">${esc(h.usuario||'—')}${h.responsable?' · 👤 '+esc(h.responsable):''}${h.nota?' · "'+esc(h.nota)+'"':''}</div>
+          </div>
+        </div>`).join('')}
+      </div>`).join('');
+  }
+
   document.getElementById('resumen-body').innerHTML = `
     <!-- KPIs -->
     <div class="resumen-kpis">
@@ -2456,41 +2498,23 @@ window.openResumenDia = function(){
       </div>
     </div>
 
-    <!-- Ingresadas hoy -->
+    <!-- Ingresadas hoy — agrupadas por obra -->
     <div class="resumen-section">
       <div class="resumen-section-title">📋 Alertas ingresadas hoy (${ingresadasHoy.length})</div>
-      ${ingresadasHoy.length
-        ? ingresadasHoy.map(a=>rowHTML(a)).join('')
-        : '<div class="resumen-empty">No se ingresaron alertas hoy</div>'}
+      ${obraGroupHTML(ingresadasHoy)}
     </div>
 
-    <!-- Movimientos hoy -->
+    <!-- Movimientos hoy — agrupados por obra -->
     <div class="resumen-section">
       <div class="resumen-section-title">🔄 Movimientos de estado hoy (${movimientosHoy.length})</div>
-      ${movimientosHoy.length
-        ? movimientosHoy.map(({alerta:a, entrada:h})=>`
-          <div class="resumen-row">
-            <div class="resumen-crit-bar" style="background:${critColor(a.criticidad)}"></div>
-            <div class="resumen-row-body">
-              <div class="resumen-row-desc">${esc(a.descripcion||'')} → <strong>${dispEstado(h.estado)}</strong></div>
-              <div class="resumen-row-meta">${esc(h.usuario||'—')}${h.responsable?' · 👤 '+esc(h.responsable):''}${h.nota?' · "'+esc(h.nota)+'"':''}</div>
-            </div>
-          </div>`).join('')
-        : '<div class="resumen-empty">Sin movimientos registrados hoy</div>'}
+      ${movGroupHTML(movimientosHoy)}
     </div>
 
-    <!-- Sin gestionar: críticas y altas -->
+    <!-- Sin gestionar — agrupadas por obra -->
     <div class="resumen-section">
       <div class="resumen-section-title">⚠ Críticas y Altas sin gestionar (${sinGestionar.length})</div>
       ${sinGestionar.length
-        ? sinGestionar.map(a=>`
-          <div class="resumen-row">
-            <div class="resumen-crit-bar" style="background:${critColor(a.criticidad)}"></div>
-            <div class="resumen-row-body">
-              <div class="resumen-row-desc">${esc(a.descripcion||'')}</div>
-              <div class="resumen-row-meta">${esc(a.obra||'—')} · ${esc(a.tipo?.split(' - ')[0]||'—')} · ${critBadge(a.criticidad)} · ${diasSin(a)} día${diasSin(a)!==1?'s':''} sin movimiento</div>
-            </div>
-          </div>`).join('')
+        ? obraGroupHTML(sinGestionar)
         : '<div class="resumen-empty">No hay alertas críticas o altas sin gestionar ✓</div>'}
     </div>
   `;
