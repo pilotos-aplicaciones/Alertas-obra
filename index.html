@@ -445,11 +445,6 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
     </div>
     <!-- Spacer -->
     <div style="flex:1"></div>
-    <!-- Sync pill -->
-    <div class="nav-sync ok" id="sync-bar" style="cursor:default">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-text">Conectando...</span>
-    </div>
     <!-- Tabs -->
     <div class="desk-only" style="display:flex;gap:4px">
       <button class="nbtn nbtn-secondary tab-btn" id="tab-alertas" onclick="switchTab('alertas')">Alertas</button>
@@ -467,6 +462,11 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
     </button>
     <!-- Principal -->
     <button class="nbtn nbtn-primary" onclick="openModal()" id="btn-nueva">+ Nueva alerta</button>
+    <!-- Sync -->
+    <div class="nav-sync ok" id="sync-bar" style="cursor:default">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">Conectando...</span>
+    </div>
     <!-- Avatar -->
     <button class="nav-avatar" id="hdr-avatar" onclick="signOut()" title="Cerrar sesión">?</button>
   </nav>  </div>
@@ -1008,8 +1008,10 @@ function initApp(){
   document.getElementById('app').style.display='none';
   // setHeaderDate — removido del header
   const av=document.getElementById('hdr-avatar');
-  av.textContent=(currentUser.displayName||currentUser.email||'?')[0].toUpperCase();
-  av.title=`${currentUser.displayName||currentUser.email} — click para salir`;
+  if(av){
+    av.textContent=(currentUser.displayName||currentUser.email||'?')[0].toUpperCase();
+    av.title=`${currentUser.displayName||currentUser.email} — click para salir`;
+  }
   setSyncStatus('syncing','Conectando...');
   // Activar pestaña alertas por defecto
   document.getElementById('tab-alertas')?.classList.add('tab-active');
@@ -2045,13 +2047,19 @@ window.addEventListener('resize',render);
 let currentTab = 'alertas';
 window.switchTab = function(tab){
   currentTab = tab;
-  const layout    = document.querySelector('.layout');
+  const sidebar   = document.getElementById('sidebar');
+  const alertList = document.getElementById('alert-list');
+  const searchBar = document.querySelector('.search-bar');
+  const detPanel  = document.getElementById('detail-panel');
   const dbView    = document.getElementById('db-view');
   const btnNueva  = document.getElementById('btn-nueva');
   const tabAlertas   = document.getElementById('tab-alertas');
   const tabDashboard = document.getElementById('tab-dashboard');
   if(tab === 'dashboard'){
-    layout.style.display   = 'none';
+    if(sidebar)   sidebar.style.display   = 'none';
+    if(searchBar) searchBar.style.display = 'none';
+    if(alertList) alertList.style.display = 'none';
+    if(detPanel)  detPanel.style.display  = 'none';
     dbView.classList.add('open');
     const btnExcel = document.getElementById('btn-excel');
     const btnInforme = document.getElementById('btn-informe');
@@ -2062,7 +2070,10 @@ window.switchTab = function(tab){
     updateDbObraOptions();
     renderDashboard();
   } else {
-    layout.style.display   = 'flex';
+    if(sidebar)   sidebar.style.display   = '';
+    if(searchBar) searchBar.style.display = '';
+    if(alertList) alertList.style.display = '';
+    if(detPanel && selectedId) detPanel.style.display = '';
     dbView.classList.remove('open');
     const btnExcel = document.getElementById('btn-excel');
     const btnInforme = document.getElementById('btn-informe');
