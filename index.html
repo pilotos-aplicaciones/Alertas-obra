@@ -397,6 +397,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 /* ── MODAL ESTÁNDAR ── */
 .modal-hdr{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
 .modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.modal-body-wrap{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
 .modal-footer{padding:12px 20px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surface)}
 .btn{height:36px;padding:0 16px;border-radius:var(--r-sm);font-size:13px;font-family:var(--font);font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;gap:6px}
 .btn-primary{background:var(--accent);color:#fff;font-weight:600}
@@ -1342,8 +1343,7 @@ function openDetailMobile(a){
       <div class="modal-title">Detalle</div>
       <button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
     </div>
-    <div class="modal-body">
-    <div class="dp-desc" style="font-size:14px;line-height:1.6">${esc(a.descripcion||'—')}</div>
+    <div class="modal-body-wrap"><div class="dp-desc" style="font-size:14px;line-height:1.6">${esc(a.descripcion||'—')}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       ${critBadge(a.criticidad)} ${estadoBadge(a.estado)}
       ${a.obra?`<span class="badge" style="background:var(--surface2);color:var(--text2)">${esc(a.obra)}</span>`:''}
@@ -1357,9 +1357,8 @@ function openDetailMobile(a){
         ${ESTADOS.map(e=>`<button class="estado-btn ${a.estado===e?'active-btn':''}" onclick="initCambioEstado('${a.id}','${e}');closeModal()">${e}</button>`).join('')}
       </div>
     </div>
-    </div>
     <div class="modal-footer" style="justify-content:stretch;gap:8px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal();setTimeout(()=>openModal('${a.id}'),100)">✏️ Editar</button>
+      <button class="mbtn mbtn-cancel" style="flex:1" onclick="closeModal();setTimeout(()=>openModal('${a.id}'),100)">✏️ Editar</button>
       <button class="btn" style="flex:1;background:var(--red-l);color:var(--red);border:1px solid var(--red-l)"
         onclick="if(confirm('¿Eliminar?')){deleteAlert('${a.id}');closeModal()}">Eliminar</button>
     </div>`;
@@ -1664,7 +1663,8 @@ function renderAdjuntosForm(){
 // ── MODAL ─────────────────────────────────────────────────────────────
 function buildForm(a){
   return `
-    <div class="modal-title">${a?'Editar alerta':'Nueva alerta'}</div>
+    <div class="modal-hdr"><div class="modal-title">${a?'Editar alerta':'Nueva alerta'}</div></div>
+    <div class="modal-body">
     <div class="fg">
       <label class="fl">Descripción <span style="color:var(--red)">*</span></label>
       <textarea class="fta" id="f-desc" placeholder="¿Qué está pasando? Describe la situación..." rows="3">${a?esc(a.descripcion||''):''}</textarea>
@@ -1718,9 +1718,10 @@ function buildForm(a){
         </div>
       </div>
     </div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="mbtn mbtn-save" id="btn-guardar" onclick="saveAlert()">Guardar alerta</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar" onclick="saveAlert()">Guardar alerta</button>
     </div>`;
 }
 
