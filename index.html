@@ -614,7 +614,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
         </select>
       </div>
 
-      <div id="alert-list"></div>
+      <div id="alert-list" style="flex:1;overflow-y:auto;overflow-x:auto"></div>
     </div>
 
     <!-- DETAIL PANEL -->
@@ -1233,7 +1233,7 @@ function render(){
       </tr>`;
     }).join('');
 
-    list.innerHTML = `<table class="alert-table">
+    list.innerHTML = `<div style="overflow-x:auto;min-height:0;flex:1"><table class="alert-table">
       <colgroup>
         <col style="width:22px">
         <col>
@@ -1257,7 +1257,7 @@ function render(){
         ${thSort('estado','Estado')}
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table></div>`;
   }
 }
 
