@@ -2078,13 +2078,15 @@ window.addEventListener('resize',render);
 let currentTab = 'alertas';
 window.switchTab = function(tab){
   currentTab = tab;
-  const layout    = document.querySelector('.layout');
+  const mainContent = document.getElementById('main-content');
+  const detailPanel = document.getElementById('detail-panel');
   const dbView    = document.getElementById('db-view');
   const btnNueva  = document.getElementById('btn-nueva');
   const tabAlertas   = document.getElementById('tab-alertas');
   const tabDashboard = document.getElementById('tab-dashboard');
   if(tab === 'dashboard'){
-    layout.style.display   = 'none';
+    if(mainContent) mainContent.style.display = 'none';
+    if(detailPanel) detailPanel.style.display = 'none';
     dbView.classList.add('open');
     const btnExcel = document.getElementById('btn-excel');
     const btnInforme = document.getElementById('btn-informe');
@@ -2095,7 +2097,8 @@ window.switchTab = function(tab){
     updateDbObraOptions();
     renderDashboard();
   } else {
-    layout.style.display   = 'flex';
+    if(mainContent) mainContent.style.display = '';
+    if(detailPanel && selectedId) detailPanel.style.display = '';
     dbView.classList.remove('open');
     const btnExcel = document.getElementById('btn-excel');
     const btnInforme = document.getElementById('btn-informe');
