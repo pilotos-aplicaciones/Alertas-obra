@@ -1548,17 +1548,11 @@ window.onFileSelected=function(event){
   renderAdjuntosForm();
 };
 
-window.removePending=function(idx){
-  pendingFiles.splice(idx,1);
-  renderAdjuntosForm();
-};
+// removePending — definida más abajo
 
 // renderAdjuntosForm — definida más abajo con soporte de thumbnails
 
-window.removeExisting=function(idx){
-  existingAdjuntos.splice(idx,1);
-  renderAdjuntosForm();
-};
+// removeExisting — definida más abajo
 
 // ── SUBIDA A STORAGE ──────────────────────────────────────────────────
 
