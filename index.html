@@ -226,7 +226,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 .fab{display:none;position:fixed;bottom:24px;right:20px;width:52px;height:52px;background:var(--accent);color:#fff;border:none;border-radius:50%;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(204,41,41,.4);z-index:50;align-items:center;justify-content:center;}
 
 /* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:24px;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--surface);border-radius:var(--r-lg);width:100%;max-width:520px;max-height:calc(100vh - 48px);overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.22);}
 .modal-inner{display:flex;flex-direction:column;gap:14px;}
@@ -238,7 +238,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 .fta{resize:vertical;min-height:64px;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .fl{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.3px;}
-.modal-btns{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 16px;border-top:1px solid var(--border);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 16px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--surface);}
 .mbtn{height:36px;padding:0 16px;border-radius:var(--r-sm);font-size:13px;font-family:var(--font);font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;gap:6px;}
 .mbtn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
 .mbtn-cancel:hover{border-color:var(--accent);color:var(--accent);}
@@ -378,6 +378,8 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
   .modal-bg{align-items:flex-end;padding:0;}
   .modal{border-radius:16px 16px 0 0;max-width:100%;max-height:92dvh;}
 }
+
+.modal-form-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
 </style>
 </head>
 <body>
