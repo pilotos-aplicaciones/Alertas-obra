@@ -2667,6 +2667,26 @@ window.dbOpenAlerta = function(id){
   switchTab('alertas');
   setTimeout(()=>openDetail(id), 100);
 };
+
+// ── FUNCIONES GLOBALES (deben estar en window por el HTML inline) ──
+window.toggleMenu = function(e){
+  e.stopPropagation();
+  document.getElementById('menu-dropdown')?.classList.toggle('open');
+};
+document.addEventListener('click', function(){
+  document.getElementById('menu-dropdown')?.classList.remove('open');
+});
+
+let _sidebarOpen = true;
+window.toggleSidebar = function(){
+  const sb = document.getElementById('sidebar');
+  const arr = document.getElementById('sb-arrow');
+  if(!sb) return;
+  _sidebarOpen = !_sidebarOpen;
+  sb.style.width = _sidebarOpen ? '220px' : '0';
+  sb.style.overflow = _sidebarOpen ? '' : 'hidden';
+  if(arr) arr.textContent = _sidebarOpen ? '◀' : '▶';
+};
 </script>
 </body>
 </html>
