@@ -335,7 +335,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 .detail-xl-inner{background:var(--white);border-radius:14px;width:100%;max-width:900px;max-height:95vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.25);display:flex;flex-direction:column;}
 .detail-xl-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-shrink:0;}
 .detail-xl-title{font-size:15px;font-weight:600;color:var(--text);line-height:1.4;flex:1;}
-.detail-xl-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;}
+.detail-xl-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;overflow-y:auto;min-height:0;align-content:start;}
 .detail-xl-full{grid-column:1/-1;}
 .detail-xl-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);flex-shrink:0;padding:0 4px;}
 .dxf{display:flex;flex-direction:column;gap:4px;}
@@ -635,6 +635,10 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
         <span class="dp-hdr-title">Detalle</span>
         <button class="dp-close" onclick="closeDetail()">✕</button>
       </div>
+      <div class="dp-body" id="dp-body"></div>
+      <div class="dp-actions" id="dp-actions"></div>
+    </div>
+  
 <!-- DASHBOARD VIEW -->
 <div class="db-view" id="db-view">
   <div class="db-filter-bar">
@@ -673,9 +677,6 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
   </div>
   <div class="db-body" id="db-body"></div>
 </div>
-      <div class="dp-body" id="dp-body"></div>
-      <div class="dp-actions" id="dp-actions"></div>
-    </div>
   </div>
 
 
@@ -1695,7 +1696,7 @@ function buildForm(a){
     <div class="modal-body">
     <div class="fg">
       <label class="fl">Título <span style="color:var(--red)">*</span></label>
-      <input class="fi" id="f-titulo" placeholder="Título breve de la alerta..." value="${a?esc(a.titulo||a.descripcion||''):''}">
+      <input class="fi" id="f-titulo" placeholder="Título breve de la alerta..." value="${a?esc(a.titulo||''):''}">
     </div>
 
     <div class="frow">
@@ -2662,6 +2663,68 @@ window.dbOpenAlerta = function(id){
 };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+// ── COLUMNAS: RESIZE ─────────────────────────────────────────────
+window.colResizeStart = function(e, handle){
+  e.preventDefault(); e.stopPropagation();
+  const th = handle.parentElement;
+  const startX = e.clientX;
+  const startW = th.offsetWidth;
+  handle.classList.add('dragging');
+  function onMove(ev){
+    const newW = Math.max(60, startW + ev.clientX - startX);
+    th.style.width = newW + 'px';
+  }
+  function onUp(){
+    handle.classList.remove('dragging');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+};
+
+// ── COLUMNAS: REORDER ────────────────────────────────────────────
+let _dragCol = null;
+window.colDragStart = function(e, col){
+  _dragCol = col;
+  e.dataTransfer.effectAllowed = 'move';
+};
+window.colDragOver = function(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+};
+window.colDrop = function(e, targetCol){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!_dragCol || _dragCol === targetCol){ _dragCol=null; return; }
+  const table = e.currentTarget.closest('table');
+  if(!table){ _dragCol=null; return; }
+  const ths = [...table.querySelectorAll('thead th[data-col]')];
+  const fromIdx = ths.findIndex(th => th.dataset.col === _dragCol);
+  const toIdx   = ths.findIndex(th => th.dataset.col === targetCol);
+  if(fromIdx < 0 || toIdx < 0){ _dragCol=null; return; }
+  const thead = table.querySelector('thead tr');
+  const rows  = [...table.querySelectorAll('tbody tr')];
+  // Calcular índice real en el tr (incluyendo el th sin data-col al inicio)
+  const allThs = [...thead.children];
+  const realFrom = allThs.indexOf(ths[fromIdx]);
+  const realTo   = allThs.indexOf(ths[toIdx]);
+  if(realFrom < 0 || realTo < 0){ _dragCol=null; return; }
+  const thArr = [...thead.children];
+  if(realFrom > realTo) thead.insertBefore(thArr[realFrom], thArr[realTo]);
+  else thead.insertBefore(thArr[realFrom], thArr[realTo].nextSibling);
+  rows.forEach(row => {
+    const tds = [...row.children];
+    if(realFrom < tds.length && realTo < tds.length){
+      if(realFrom > realTo) row.insertBefore(tds[realFrom], tds[realTo]);
+      else row.insertBefore(tds[realFrom], tds[realTo].nextSibling);
+    }
+  });
+  _dragCol = null;
+};
+
+</script>
 </body>
 </html>
