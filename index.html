@@ -404,6 +404,18 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 .btn-primary:hover{background:var(--red-d)}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
 .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── COLUMNAS REDIMENSIONABLES ── */
+.alert-table th{position:relative;}
+.col-resize-handle{
+  position:absolute;right:0;top:0;bottom:0;
+  width:5px;cursor:col-resize;
+  background:transparent;z-index:1;
+  user-select:none;
+}
+.col-resize-handle:hover,.col-resize-handle.dragging{background:var(--accent);opacity:.4;}
+.alert-table th.drag-over{background:var(--accent-l);}
+.alert-table th[draggable]{cursor:grab;}
 </style>
 </head>
 <body>
@@ -1210,7 +1222,18 @@ function render(){
     function thSort(col, label){
       const active = sortCol===col;
       const arrow  = active ? (sortDir==='asc'?'↑':'↓') : '<span style="opacity:.25">↕</span>';
-      return `<th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="setSort('${col}')">${label} ${arrow}</th>`;
+      return `<th data-col="${col}" draggable="true"
+        ondragstart="colDragStart(event,'${col}')"
+        ondragover="colDragOver(event)"
+        ondrop="colDrop(event,'${col}')"
+        ondragleave="this.classList.remove('drag-over')"
+        style="cursor:pointer;user-select:none;position:relative"
+        onclick="setSort('${col}')">
+        ${label} ${arrow}
+        <div class="col-resize-handle"
+          onmousedown="colResizeStart(event,this)"
+          onclick="event.stopPropagation()"></div>
+      </th>`;
     }
 
     const rows = sorted.map(a=>{
@@ -1222,7 +1245,8 @@ function render(){
         <td style="width:22px;padding:0 0 0 14px;vertical-align:middle">
           <div style="width:4px;height:24px;border-radius:2px;background:${color}"></div>
         </td>
-        <td class="td-desc">${inc?'<span class="inc-dot" title="Registro incompleto"></span>':''}${esc(a.titulo||a.descripcion||'')}</td>
+        <td class="td-desc" style="font-weight:600">${inc?'<span class="inc-dot" title="Registro incompleto"></span>':''}${esc(a.titulo||'—')}</td>
+        <td class="td-txt" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(a.descripcion||'')}">${esc(a.descripcion||'—')}</td>
         <td class="td-txt">${esc(nombreVisible(a))}</td>
         <td class="td-mono">${fmtFecha(a.creadoEn)}</td>
         <td class="td-txt">${esc(a.obra||'—')}</td>
@@ -1236,7 +1260,8 @@ function render(){
     list.innerHTML = `<div style="overflow-x:auto;min-height:0;flex:1"><table class="alert-table">
       <colgroup>
         <col style="width:22px">
-        <col>
+        <col style="width:160px">
+        <col style="min-width:120px">
         <col style="width:110px">
         <col style="width:76px">
         <col style="width:68px">
@@ -1247,6 +1272,7 @@ function render(){
       </colgroup>
       <thead><tr>
         <th style="width:22px;padding-left:14px"></th>
+        ${thSort('titulo','Título')}
         ${thSort('descripcion','Descripción')}
         ${thSort('nombre','Creado por')}
         ${thSort('creadoEn','Fecha')}
