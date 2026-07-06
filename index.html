@@ -229,7 +229,7 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:24px;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--surface);border-radius:var(--r-lg);width:100%;max-width:520px;max-height:calc(100vh - 48px);overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.22);}
-.modal-inner{display:flex;flex-direction:column;overflow-y:auto;max-height:calc(100vh - 48px);}
+.modal-inner{display:flex;flex-direction:column;overflow-y:auto;}
 .modal-title{font-size:15px;font-weight:600;color:var(--text);padding:16px 0 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;margin:0 -24px;padding-left:24px;padding-right:24px;}
 .fg{display:flex;flex-direction:column;gap:5px;}
 /* fl definido en inputs */
@@ -395,10 +395,10 @@ html{font-size:16px;}body{font-family:var(--font);background:var(--bg);color:var
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .nav-avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;border:none}
 /* ── MODAL ESTÁNDAR ── */
-.modal-hdr{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
-.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.modal-hdr{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);z-index:1}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1}
 .modal-body-wrap{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
-.modal-footer{padding:12px 20px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surface)}
+.modal-footer{padding:12px 20px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;background:var(--surface)}
 .btn{height:36px;padding:0 16px;border-radius:var(--r-sm);font-size:13px;font-family:var(--font);font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;gap:6px}
 .btn-primary{background:var(--accent);color:#fff;font-weight:600}
 .btn-primary:hover{background:var(--red-d)}
@@ -1078,7 +1078,7 @@ function getFiltered(){
     if(filters.situacion &&a.situacion!==filters.situacion) return false;
     if(filters.obra      &&a.obra!==filters.obra) return false;
     if(filters.usuario   &&a.creadoPor!==filters.usuario) return false;
-    if(q&&!((a.descripcion||'').toLowerCase().includes(q)||(a.obra||'').toLowerCase().includes(q)||(a.tipo||'').toLowerCase().includes(q))) return false;
+    if(q&&!((a.titulo||'').toLowerCase().includes(q)||(a.descripcion||'').toLowerCase().includes(q)||(a.obra||'').toLowerCase().includes(q)||(a.tipo||'').toLowerCase().includes(q))) return false;
     if(fechaDesde||fechaHasta){
       const ts = a.creadoEn?.toDate?.()||null;
       if(!ts) return false;
@@ -1183,7 +1183,7 @@ function render(){
       return `<div class="mob-row" onclick="openDetail('${a.id}')">
         <div class="mob-crit-bar" style="background:${color}"></div>
         <div class="mob-body">
-          <div class="mob-title">${adjIcon_}${esc(a.descripcion||'')}</div>
+          <div class="mob-title">${adjIcon_}${esc(a.titulo||a.descripcion||'')}</div>
           <div class="mob-meta">${esc(meta)} · ${fmtFecha(a.creadoEn)}</div>
           <div class="mob-badges">${critBadge(a.criticidad)} ${estadoBadge(a.estado)}</div>
         </div></div>`;
@@ -1222,7 +1222,7 @@ function render(){
         <td style="width:22px;padding:0 0 0 14px;vertical-align:middle">
           <div style="width:4px;height:24px;border-radius:2px;background:${color}"></div>
         </td>
-        <td class="td-desc">${inc?'<span class="inc-dot" title="Registro incompleto"></span>':''}${esc(a.descripcion||'')}</td>
+        <td class="td-desc">${inc?'<span class="inc-dot" title="Registro incompleto"></span>':''}${esc(a.titulo||a.descripcion||'')}</td>
         <td class="td-txt">${esc(nombreVisible(a))}</td>
         <td class="td-mono">${fmtFecha(a.creadoEn)}</td>
         <td class="td-txt">${esc(a.obra||'—')}</td>
@@ -1384,7 +1384,7 @@ window.openDetailXL=function(id){
   inner.innerHTML=`
     <div class="detail-xl-hdr">
       <div>
-        <div class="detail-xl-title">${esc(a.descripcion||'Sin descripción')}</div>
+        <div class="detail-xl-title">${esc(a.titulo||a.descripcion||'Sin descripción')}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace">${a.id}</div>
       </div>
       <button class="detail-xl-close" onclick="closeDetailXL()">✕</button>
@@ -1668,15 +1668,19 @@ function buildForm(a){
     <div class="modal-hdr"><div class="modal-title">${a?'Editar alerta':'Nueva alerta'}</div></div>
     <div class="modal-body">
     <div class="fg">
-      <label class="fl">Descripción <span style="color:var(--red)">*</span></label>
-      <textarea class="fta" id="f-desc" placeholder="¿Qué está pasando? Describe la situación..." rows="3">${a?esc(a.descripcion||''):''}</textarea>
+      <label class="fl">Título <span style="color:var(--red)">*</span></label>
+      <input class="fi" id="f-titulo" placeholder="Título breve de la alerta..." value="${a?esc(a.titulo||a.descripcion||''):''}">
+    </div>
+    <div class="fg">
+      <label class="fl">Descripción <span style="font-weight:400;text-transform:none;color:var(--text3)">(detalle opcional)</span></label>
+      <textarea class="fta" id="f-desc" placeholder="Detalla la situación..." rows="3">${a?esc(a.descripcion||''):''}</textarea>
     </div>
     <div class="frow">
       <div class="fg">
         <label class="fl">Obra</label>
         <select class="fsel" id="f-obra">
           <option value="" disabled selected>Seleccionar obra *</option>
-          ${['Alvarez Oriente','18 de Septiembre','Francisco Zelada'].map(o=>`<option${a?.obra===o?' selected':''}>${o}</option>`).join('')}
+          ${['Alvarez Oriente','18 de Septiembre','Francisco Zelada','Trocadero'].map(o=>`<option${a?.obra===o?' selected':''}>${o}</option>`).join('')}
         </select>
       </div>
       <div class="fg">
@@ -1753,6 +1757,7 @@ window.closeModal=function(){
 };
 
 window.saveAlert=async function(){
+  const titulo=document.getElementById('f-titulo')?.value?.trim();
   const desc=document.getElementById('f-desc')?.value.trim();
   const obra       =document.getElementById('f-obra')?.value||'';
   const criticidad =document.getElementById('f-criticidad')?.value||'';
@@ -1761,9 +1766,9 @@ window.saveAlert=async function(){
   const estado     =document.getElementById('f-estado')?.value||'Activa';
 
   // Validación campos obligatorios
-  if(!desc){
-    document.getElementById('f-desc')?.focus();
-    showToast('⚠ La descripción es obligatoria'); return;
+  if(!titulo){
+    document.getElementById('f-titulo')?.focus();
+    showToast('⚠ El título es obligatorio'); return;
   }
   if(!obra){
     document.getElementById('f-obra')?.focus();
@@ -1804,7 +1809,8 @@ window.saveAlert=async function(){
     } else {
       const adjuntosNuevos = pendingFiles.map(f=>({name:f.name, tipo:f.tipo, b64:f.b64}));
       await addDoc(collection(db,COLECCION),{
-        descripcion:desc,obra,criticidad,tipo,situacion,estado:'Activa',
+        titulo:titulo||'',
+    descripcion:desc,obra,criticidad,tipo,situacion,estado:'Activa',
         creadoPor:currentUser.email,
         creadoNombre:currentUser.displayName||currentUser.email.split('@')[0],
         creadoEn:serverTimestamp(),
@@ -2459,7 +2465,7 @@ window.openResumenDia = function(){
     return `<div class="resumen-row">
       <div class="resumen-crit-bar" style="background:${critColor(a.criticidad)}"></div>
       <div class="resumen-row-body">
-        <div class="resumen-row-desc">${esc(a.descripcion||'')}</div>
+        <div class="resumen-row-desc">${esc(a.titulo||a.descripcion||'')}</div>
         <div class="resumen-row-meta">${esc(a.obra||'—')} · ${esc(a.tipo?.split(' - ')[0]||'—')} · ${critBadge(a.criticidad)} ${estadoBadge(a.estado)}</div>
       </div>
     </div>`;
@@ -2504,7 +2510,7 @@ window.openResumenDia = function(){
         ${items.map(({a,h})=>`<div class="resumen-row">
           <div class="resumen-crit-bar" style="background:${critColor(a.criticidad)}"></div>
           <div class="resumen-row-body">
-            <div class="resumen-row-desc">${esc(a.descripcion||'')} → <strong>${dispEstado(h.estado)}</strong></div>
+            <div class="resumen-row-desc">${esc(a.titulo||a.descripcion||'')} → <strong>${dispEstado(h.estado)}</strong></div>
             <div class="resumen-row-meta">${esc(h.usuario||'—')}${h.responsable?' · 👤 '+esc(h.responsable):''}${h.nota?' · "'+esc(h.nota)+'"':''}</div>
           </div>
         </div>`).join('')}
