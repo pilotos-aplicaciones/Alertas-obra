@@ -1698,6 +1698,10 @@ function buildForm(a){
       <label class="fl">Título <span style="color:var(--red)">*</span></label>
       <input class="fi" id="f-titulo" placeholder="Título breve de la alerta..." value="${a?esc(a.titulo||''):''}">
     </div>
+    <div class="fg">
+      <label class="fl">Descripción</label>
+      <textarea class="fta" id="f-desc" placeholder="Detalla la situación..." rows="3">${a?esc(a.descripcion||''):''}</textarea>
+    </div>
 
     <div class="frow">
       <div class="fg">
@@ -1782,7 +1786,7 @@ window.closeModal=function(){
 
 window.saveAlert=async function(){
   const titulo=document.getElementById('f-titulo')?.value?.trim();
-  const desc=document.getElementById('f-desc')?.value.trim();
+  const desc=document.getElementById('f-desc')?.value?.trim()||'';
   const obra       =document.getElementById('f-obra')?.value||'';
   const criticidad =document.getElementById('f-criticidad')?.value||'';
   const tipo       =document.getElementById('f-tipo')?.value||'';
@@ -2661,13 +2665,12 @@ window.dbOpenAlerta = function(id){
   switchTab('alertas');
   setTimeout(()=>openDetail(id), 100);
 };
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+
 // ── COLUMNAS: RESIZE ─────────────────────────────────────────────
 window.colResizeStart = function(e, handle){
   e.preventDefault(); e.stopPropagation();
   const th = handle.parentElement;
+  th.setAttribute('draggable','false');
   const startX = e.clientX;
   const startW = th.offsetWidth;
   handle.classList.add('dragging');
@@ -2677,6 +2680,7 @@ window.colResizeStart = function(e, handle){
   }
   function onUp(){
     handle.classList.remove('dragging');
+    setTimeout(()=>th.setAttribute('draggable','true'), 50);
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('mouseup', onUp);
   }
@@ -2724,7 +2728,8 @@ window.colDrop = function(e, targetCol){
   });
   _dragCol = null;
 };
-
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
